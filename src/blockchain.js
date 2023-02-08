@@ -64,6 +64,22 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
+
+            let validateErrors = [];
+
+            try {
+                validateErrors = await self.validateChain();
+            } catch (error) {
+                console.log(error);
+                reject(error);
+                return;
+            }
+
+            if (validateErrors.length != 0) {
+                reject(block);
+                return;
+            }
+
            block.height = self.height + 1;
            block.time = new Date().getTime().toString().slice(0,-3);
 
@@ -214,8 +230,15 @@ class Blockchain {
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
             self.chain.forEach(block => {
-                if (!block.validate()) {
-                    errorLog.push(block);
+                if (block.height > 0) {
+                    if (! block.validate()) {
+                        errorLog.push(block);
+                    } 
+
+                    if (block.previousBlockHash != self.chain[block.height - 1].hash) {
+                        errorLog.push(block);
+                    }
+
                 }
             });
             resolve(errorLog);
