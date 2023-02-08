@@ -137,6 +137,7 @@ class Blockchain {
             let block = new BlockClass.Block(data);
 
             if (!isVerified) {
+                console.log("Not verified");
                 reject(block);
                 return;
             }
@@ -191,10 +192,14 @@ class Blockchain {
         let stars = [];
         return new Promise((resolve, reject) => {
             self.chain.forEach(async(b) => {
-                let blockData = await b.getBData();
-                if (blockData.address == address) stars.push(blockData);
+                try {
+                    let blockData = await b.getBData();
+                    if (blockData.address == address) stars.push(blockData);
+                } catch (error) {
+                    reject(error);
+                }
             });
-            resolve(results);
+            resolve(stars);
         });
     }
 
